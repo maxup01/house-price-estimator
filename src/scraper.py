@@ -8,6 +8,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+
+from property import PropertyDetails
 from src.city import SpainCity
 from selenium.webdriver.support import expected_conditions
 
@@ -125,12 +127,19 @@ class HouseDetailsHarvester:
         except Exception:
             pass
 
-        return {
-            "url": url,
-            "type": prop_type,
-            "price_eur": price,
-            "bedrooms": find_int("Dormitorios"),
-            "bathrooms": find_int(r"Ba[ñn]os"),
-            "built_area_m2": find_area("Superficie"),
-            "plot_area_m2": find_area("Terreno"),
-        }
+        return PropertyDetails(
+            url, price,
+            property_type = prop_type, bedrooms = find_int("Dormitorios"),
+            bathrooms = find_int(r"Ba[ñn]os"), built_area_m2 = find_area("Superficie"),
+            plot_area_m2 = find_area("Terreno")
+        )
+
+    def harvest_data(self, city: SpainCity) -> list[PropertyDetails]:
+        properties = list()
+
+        for url in self.get_property_urls(city):
+            details = self.gather_details(url)
+
+            properties.append(details)
+
+        return properties
