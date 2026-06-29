@@ -6,6 +6,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 
+THINK_SPAIN_URL = "https://www.thinkspain.com/es/venta-viviendas"
+
 class HouseDetailsHarvester:
     driver: WebDriver
 
