@@ -1,3 +1,5 @@
+import time
+import random
 from selenium import webdriver
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
@@ -14,4 +16,6 @@ class HouseDetailsHarvester:
         options.add_argument("--headless")
 
         self.driver = webdriver.Chrome(service = service, options = options)
-        
+    
+    def polite_pause(lowest: float = 2.0, highest: float = 5.0) -> None:
+        time.sleep(random.uniform(lowest, highest))
