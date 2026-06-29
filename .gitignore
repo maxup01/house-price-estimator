@@ -1,0 +1,33 @@
+# Python bytecode
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
+# Virtual environments
+**/.venv/
+**/env/
+**/venv/
+
+# Jupyter
+**/.ipynb_checkpoints/
+
+# Scraped data (often large / regenerable / sometimes legally sensitive)
+**/data/*.csv
+**/data/*.json
+**/*.log
+
+# Selenium / webdriver
+**/*.png
+**/geckodriver.log
+**/chromedriver.log
+
+# IDE / editor
+**/.vscode/
+**/.idea/
+**/*.swp
+**/.DS_Store
+
+# Secrets / credentials
+**/.env
+**/*.secret
+**/config.local.py

@@ -1,0 +1,10 @@
+name: house-price-estimator
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - selenium
+  - pip
+  - pip:
+      - webdriver-manager
