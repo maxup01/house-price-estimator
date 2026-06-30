@@ -32,7 +32,7 @@ class PriceEstimator:
                 row.append(1.0 if entry.property_type == t else 0.0)
 
             X.append(row)
-            y.append(entry.price_eur)
+            y.append(numpy.log(entry.price_eur))
 
         self.X = numpy.array(X, dtype=float)
         self.y = numpy.array(y, dtype=float)
@@ -64,8 +64,10 @@ class PriceEstimator:
         for name in self.feature_names:
             if name.startswith("type_"):
                 category = name[len("type_"):]  # "type_House" -> "House"
+
                 row.append(1.0 if property_input.property_type == category else 0.0)
 
         # prepend the intercept's 1, then multiply by theta
         x = numpy.array([1.0] + row)
-        return float(x @ self.theta)
+
+        return numpy.exp(float(x @ self.theta))
