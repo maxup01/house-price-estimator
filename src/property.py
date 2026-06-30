@@ -28,18 +28,16 @@ def numeric_features():
 
 @dataclass
 class PropertyInput:
-    price_eur: float
-    property_type: Optional[str]
+    property_type: str
     bedrooms: int
     bathrooms: int
     built_area_m2: int
     plot_area_m2: int
 
     def __init__(
-            self, price_eur, bedrooms, bathrooms,
-            built_area_m2, plot_area_m2, property_type = None
+            self, property_type, bedrooms, bathrooms,
+            built_area_m2, plot_area_m2
     ):
-        self.price_eur = price_eur
         self.property_type = property_type
         self.bedrooms = bedrooms
         self.bathrooms = bathrooms

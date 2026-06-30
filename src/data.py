@@ -14,10 +14,11 @@ class DataProvider:
         self.data_harvester = HouseDetailsHarvester()
 
     def retrieve_data(self, city: SpainCity) -> list[PropertyDetails]:
-        path = f"{city}.csv"
+        path = f"{city.value}.csv"
 
         if os.path.exists(path):
             df = pandas.read_csv(path)
+
             return [PropertyDetails(**row) for row in df.to_dict(orient="records")]
 
         data = self.data_harvester.harvest_data(city)

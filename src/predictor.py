@@ -1,7 +1,8 @@
-from property import PropertyDetails, numeric_features
+from property import PropertyDetails, numeric_features, PropertyInput
 import numpy
+import math
 
-class Predictor:
+class PriceEstimator:
     def __init__(self, entries: list[PropertyDetails]):
         self.theta = None
         self.intercept = None
@@ -23,7 +24,8 @@ class Predictor:
             # numeric values (None -> 0.0; better: skip/impute, see notes)
             for f in numeric_features():
                 value = getattr(entry, f)
-                row.append(float(value) if value is not None else 0.0)
+
+                row.append(float(value) if not math.isnan(value) else 0.0)
 
             # one-hot for property type
             for t in type_categories:
@@ -45,3 +47,25 @@ class Predictor:
         self.coefficients = theta[1:]
 
         return theta
+
+    def estimate_price(self, property_input: PropertyInput) -> float:
+        if self.theta is None:
+            raise RuntimeError("Call fit() before estimate_price()")
+
+        row = []
+
+        # numeric values, same order as training
+        for f in numeric_features():
+            value = getattr(property_input, f)
+            row.append(float(value) if value is not None else 0.0)
+
+        # one-hot the property type against the SAME categories used in fit
+        # self.feature_names holds the trained layout, e.g. ["...", "type_House", "type_Villa"]
+        for name in self.feature_names:
+            if name.startswith("type_"):
+                category = name[len("type_"):]  # "type_House" -> "House"
+                row.append(1.0 if property_input.property_type == category else 0.0)
+
+        # prepend the intercept's 1, then multiply by theta
+        x = numpy.array([1.0] + row)
+        return float(x @ self.theta)

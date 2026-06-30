@@ -25,11 +25,8 @@ class HouseDetailsHarvester:
         options.add_argument("--headless")
 
         self.driver = webdriver.Chrome(service = service, options = options)
-    
-    def polite_pause(lowest: float = 2.0, highest: float = 5.0) -> None:
-        time.sleep(random.uniform(lowest, highest))
 
-    def get_property_urls(self, city: SpainCity, target: int = 100) -> list[str]:
+    def get_property_urls(self, city: SpainCity, target: int = 90) -> list[str]:
         """
         Collect up to `target` property detail-page URLs for a thinkSPAIN city
         by paging through ?numpag=1,2,3... (the same pagination "Mostrar más" uses).
@@ -38,7 +35,7 @@ class HouseDetailsHarvester:
             urls = get_property_urls(driver, "marbella", target=100)
         """
 
-        base_url = f"https://www.thinkspain.com/es/venta-viviendas/{city}"
+        base_url = f"https://www.thinkspain.com/es/venta-viviendas/{city.value}"
         urls: list[str] = []
         seen_ids: set[str] = set()
         page = 1
@@ -48,7 +45,7 @@ class HouseDetailsHarvester:
 
             self.driver.get(page_url)
 
-            self.polite_pause()
+            polite_pause()
 
             # Every listing card carries data-property-id — this is our hook
             cards = self.driver.find_elements(
@@ -83,55 +80,51 @@ class HouseDetailsHarvester:
         return urls[:target]
 
     def gather_details(self, url):
-        """
-        Navigate to a thinkSPAIN property page with the existing Selenium driver
-        and extract its key characteristics. Missing fields come back as None.
-        Assumes self.driver is a live WebDriver.
-        """
-
         self.driver.get(url)
 
-        # wait until the características block (or H1) has loaded
         WebDriverWait(self.driver, 15).until(
-            expected_conditions.presence_of_element_located((By.TAG_NAME, "h1"))
+            expected_conditions.presence_of_element_located(
+                (By.CSS_SELECTOR, "ul.features-list li")
+            )
         )
+
+        # --- property type: first li in características without a measurement label ---
+        prop_type = None
+        items = self.driver.find_elements(By.CSS_SELECTOR, "ul.features-list li")
+        labels = ("Dormitorios", "Baños", "Baňos", "Superficie", "Terreno")
+        for li in items:
+            t = li.text.strip()
+            if t and not any(t.startswith(l) for l in labels):
+                prop_type = t  # "Chalet", "Apartamento", "Casa"...
+                break
 
         text = self.driver.find_element(By.TAG_NAME, "body").text
 
         def find_int(label):
             m = re.search(rf"{label}\s*:?\s*(\d+)", text, re.IGNORECASE)
-
             return int(m.group(1)) if m else None
 
         def find_area(label):
             m = re.search(rf"{label}\s*:?\s*([\d.,]+)\s*m", text, re.IGNORECASE)
-
             if not m:
                 return None
-
             return int(re.sub(r"[.,]", "", m.group(1)))
 
         price = None
-
         pm = re.search(r"([\d.]+)\s*€", text)
-
         if pm:
             price = int(pm.group(1).replace(".", ""))
 
-        prop_type = None
-
-        try:
-            h1 = self.driver.find_element(By.TAG_NAME, "h1").text
-
-            prop_type = h1.split(" en ")[0]
-        except Exception:
-            pass
+        built = find_area("Superficie")
+        plot = find_area("Terreno")
 
         return PropertyDetails(
             url, price,
-            property_type = prop_type, bedrooms = find_int("Dormitorios"),
-            bathrooms = find_int(r"Ba[ñn]os"), built_area_m2 = find_area("Superficie"),
-            plot_area_m2 = find_area("Terreno")
+            property_type=prop_type,
+            bedrooms=find_int("Dormitorios"),
+            bathrooms=find_int(r"Ba[ñn]os"),
+            built_area_m2=built,
+            plot_area_m2=plot,
         )
 
     def harvest_data(self, city: SpainCity) -> list[PropertyDetails]:
@@ -143,3 +136,6 @@ class HouseDetailsHarvester:
             properties.append(details)
 
         return properties
+
+def polite_pause(lowest: float = 2.0, highest: float = 5.0) -> None:
+    time.sleep(random.uniform(lowest, highest))

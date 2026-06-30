@@ -31,3 +31,5 @@
 **/.env
 **/*.secret
 **/config.local.py
+
+**/*.csv
