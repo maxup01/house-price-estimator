@@ -4,7 +4,7 @@ from typing import Optional
 @dataclass
 class PropertyDetails:
     url: str
-    price_eur: int
+    price_eur: float
     property_type: Optional[str] = None
     bedrooms: Optional[int] = None
     bathrooms: Optional[int] = None
@@ -12,7 +12,7 @@ class PropertyDetails:
     plot_area_m2: Optional[int] = None
 
     def __init__(
-            self, url, price_eur=None, property_type=None, bedrooms=None, bathrooms=None,
+            self, url, price_eur, property_type=None, bedrooms=None, bathrooms=None,
             built_area_m2=None, plot_area_m2=None
     ):
         self.url = url
@@ -22,3 +22,6 @@ class PropertyDetails:
         self.bathrooms = bathrooms
         self.built_area_m2 = built_area_m2
         self.plot_area_m2 = plot_area_m2
+
+def numeric_features():
+    return ["bedrooms", "bathrooms", "built_area_m2", "plot_area_m2"]
