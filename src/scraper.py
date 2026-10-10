@@ -65,7 +65,7 @@ class HouseDetailsHarvester:
 
                     urls.append(f"https://www.thinkspain.com/es/venta-viviendas/{prop_id}")
 
-                    new_this_page += 100
+                    new_this_page += 1
 
                 if len(urls) >= target:
                     break
